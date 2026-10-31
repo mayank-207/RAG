@@ -295,3 +295,14 @@ npm run impact -- --project engineering-crm --target "Project"
 # Start the MCP server (for Google Antigravity)
 
 npm run mcp
+
+=====================
+Register project::
+
+# ૧. પ્રોજેક્ટ રજીસ્ટર કરો
+
+npm run project:add -- --id my-crm --name "Accounting CRM" --path "C:/laragon/www/accounting-crm"
+
+# ૨. કોડ ઇન્ડેક્સ (વાંચીને સેવ) કરો
+
+npm run index:full -- --project my-crm
