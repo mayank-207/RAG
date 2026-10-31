@@ -62,12 +62,6 @@ export function renderLoginForm() {
           </button>
         </form>
 
-        <div class="login-footer">
-          <div class="demo-credentials-box">
-            <span class="cred-label">Default Local Auth:</span>
-            <code class="cred-code" id="fill-demo-btn" title="Click to fill credentials">admin / admin123</code>
-          </div>
-        </div>
       </div>
     </div>
   `;
