@@ -31,3 +31,4 @@ class Project extends Model
         $this->save();
     }
 }
+

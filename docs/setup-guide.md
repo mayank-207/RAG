@@ -154,3 +154,4 @@ Ollama provides local vector embeddings without requiring paid cloud APIs.
    ```bash
    npm run mcp
    ```
+

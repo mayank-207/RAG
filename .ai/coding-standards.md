@@ -14,3 +14,4 @@
 ## 3. Error Handling & Logging
 - Log output destined for diagnostics must write to structured log files or `stderr` when running the MCP server to avoid corrupting `stdout` JSON-RPC streams.
 - Throw typed, identifiable errors with contextual diagnostics.
+

@@ -11,3 +11,4 @@ export async function createProject(payload: { title: string; budget: number }) 
   });
   return response.json();
 }
+

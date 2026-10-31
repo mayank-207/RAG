@@ -30,3 +30,4 @@ class User extends Model
         return $this->department_id === $deptId;
     }
 }
+

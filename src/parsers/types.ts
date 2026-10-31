@@ -84,3 +84,4 @@ export interface ParsedFileResult {
   memories: ParsedCuratedMemory[];
   rawChunks: RawChunk[];
 }
+

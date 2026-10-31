@@ -127,3 +127,4 @@ Combines multiple search modalities using weighted reciprocal rank fusion (RRF):
    - File modification or script execution in registered projects is strictly prohibited.
 4. **Secret Blacklist**:
    - Automatically skips `.env`, `.env.*`, `*.pem`, `*.key`, `id_rsa`, certificates, tokens, and binary files.
+

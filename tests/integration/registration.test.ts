@@ -80,3 +80,4 @@ describe('Project Registration & Multi-Project Isolation', () => {
     expect(files).toHaveLength(0);
   });
 });
+

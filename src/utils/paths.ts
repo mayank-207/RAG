@@ -33,3 +33,4 @@ export function toRelativePosixPath(rootPath: string, fullPath: string): string 
   const relative = path.relative(path.resolve(rootPath), safeFull);
   return normalizePath(relative);
 }
+

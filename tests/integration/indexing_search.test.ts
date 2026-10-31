@@ -128,3 +128,4 @@ describe('End-to-End Indexing & Hybrid Search', () => {
     expect(search.curatedRules[0].ruleStatement).toContain('budget');
   });
 });
+

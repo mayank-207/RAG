@@ -109,3 +109,4 @@ $$\text{Score} = w_{\text{exact}} \cdot S_{\text{exact}} + w_{\text{fulltext}} \
 - **Vector Match**: Captures semantic intent (e.g., "handle user signup" finds `RegisterController::create`).
 - **Curated Memory**: Surfaces mandatory business rules or architectural guidelines relevant to the topic.
 - **Dependency Expansion**: Pulls in related migrations, models, and tests so the AI assistant sees the full picture before proposing edits.
+

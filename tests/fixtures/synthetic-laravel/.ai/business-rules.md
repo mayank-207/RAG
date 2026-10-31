@@ -8,3 +8,4 @@
 ## Department Permission Checking
 - Department managers can only access resources matching their `department_id`.
 - Cross-department operations require executive admin role approval.
+

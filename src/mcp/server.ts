@@ -245,3 +245,4 @@ export class CodeContextMcpServer {
     logger.info('code-context-mcp server started via stdio transport.');
   }
 }
+

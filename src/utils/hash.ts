@@ -13,3 +13,4 @@ export function sha256(content: string | Buffer): string {
 export function generateChunkId(projectId: string, relativePath: string, startLine: number, endLine: number, content: string): string {
   return sha256(`${projectId}:${relativePath}:${startLine}:${endLine}:${sha256(content)}`);
 }
+

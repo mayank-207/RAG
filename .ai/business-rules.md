@@ -20,3 +20,4 @@
 ## Rule 5: Local Execution Only
 - No mandatory external paid AI APIs (OpenAI, Gemini API, etc.) for core retrieval or indexing.
 - Embeddings must be generated locally via Ollama.
+

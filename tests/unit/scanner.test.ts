@@ -67,3 +67,4 @@ describe('CodeChunker & Hash Integrity', () => {
     expect(processed[0].chunkId).toBeDefined();
   });
 });
+

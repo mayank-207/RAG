@@ -24,16 +24,16 @@ It indexes local developer codebases, builds lexical and AST-level symbol indexe
 
 ## 2. Technology Stack
 
-| Component | Technology | Role |
-|---|---|---|
-| Runtime | Node.js (v20+ / v22+) | Application engine |
-| Language | TypeScript 5.7+ | Strict ES module codebase |
-| Protocol | Official `@modelcontextprotocol/sdk` | MCP stdio integration |
-| Relational DB | **MySQL 8.4** | **Sole relational store** (entities, symbols, FULLTEXT, routes, migrations) |
-| Vector DB | Qdrant | Dense chunk embeddings & semantic nearest-neighbor search |
-| Embeddings | Ollama (`nomic-embed-text`) | Local 768-dimensional vector generation |
-| Parsers | `php-parser`, `@babel/parser` | AST-level symbol extraction |
-| Testing | Vitest | Integration & unit test suite |
+| Component     | Technology                           | Role                                                                        |
+| ------------- | ------------------------------------ | --------------------------------------------------------------------------- |
+| Runtime       | Node.js (v20+ / v22+)                | Application engine                                                          |
+| Language      | TypeScript 5.7+                      | Strict ES module codebase                                                   |
+| Protocol      | Official `@modelcontextprotocol/sdk` | MCP stdio integration                                                       |
+| Relational DB | **MySQL 8.4**                        | **Sole relational store** (entities, symbols, FULLTEXT, routes, migrations) |
+| Vector DB     | Qdrant                               | Dense chunk embeddings & semantic nearest-neighbor search                   |
+| Embeddings    | Ollama (`nomic-embed-text`)          | Local 768-dimensional vector generation                                     |
+| Parsers       | `php-parser`, `@babel/parser`        | AST-level symbol extraction                                                 |
+| Testing       | Vitest                               | Integration & unit test suite                                               |
 
 > **Note on Database Rule**: MySQL 8.4 is the only relational database used. SQLite and PostgreSQL are never used in this project.
 
@@ -52,13 +52,16 @@ It indexes local developer codebases, builds lexical and AST-level symbol indexe
 ## 4. Quick Start & Setup
 
 ### 4.1. Clone Repository & Install Dependencies
+
 ```bash
 git checkout feature/initial-mcp-server
 npm install
 ```
 
 ### 4.2. MySQL 8.4 Database Setup
+
 Create the dedicated database in your local MySQL 8.4 instance:
+
 ```sql
 CREATE DATABASE IF NOT EXISTS code_context_mcp
   CHARACTER SET utf8mb4
@@ -66,7 +69,9 @@ CREATE DATABASE IF NOT EXISTS code_context_mcp
 ```
 
 ### 4.3. Vector Database (Qdrant) Setup
+
 Run Qdrant locally on port 6333:
+
 - **Via Docker**:
   ```bash
   docker run -d -p 6333:6333 -v qdrant_storage:/qdrant/storage:z qdrant/qdrant
@@ -78,6 +83,7 @@ Run Qdrant locally on port 6333:
   ```
 
 ### 4.4. Local Embeddings (Ollama) Setup
+
 1. Install Ollama from [ollama.com](https://ollama.com/download).
 2. Pull the recommended embedding model:
    ```bash
@@ -89,11 +95,15 @@ Run Qdrant locally on port 6333:
    ```
 
 ### 4.5. Environment Configuration
+
 Copy `.env.example` to `.env`:
+
 ```bash
 cp .env.example .env
 ```
+
 Ensure your `.env` contains your local credentials:
+
 ```ini
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -107,15 +117,19 @@ OLLAMA_EMBED_MODEL=nomic-embed-text
 ```
 
 ### 4.6. Run Database Migrations
+
 ```bash
 npm run migrate
 ```
+
 Check status:
+
 ```bash
 npm run db:status
 ```
 
 ### 4.7. Verify Services Health
+
 ```bash
 npm run health
 ```
@@ -125,28 +139,35 @@ npm run health
 ## 5. Registering and Indexing Projects
 
 ### Register a Project
+
 ```bash
 npm run project:add -- --id engineering-crm --name "Engineering CRM" --path "C:/path/to/engineering-crm" --framework laravel
 ```
 
 ### List Registered Projects
+
 ```bash
 npm run project:list
 ```
 
 ### Run Full Indexing
+
 ```bash
 npm run index:full -- --project engineering-crm
 ```
 
 ### Run Incremental Indexing
+
 Only processes added, modified, or deleted files:
+
 ```bash
 npm run index:incremental -- --project engineering-crm
 ```
 
 ### Watch Mode
+
 Automatically updates the index as files are saved:
+
 ```bash
 npm run index:watch -- --project engineering-crm
 ```
@@ -156,16 +177,19 @@ npm run index:watch -- --project engineering-crm
 ## 6. CLI Search and Context Inspection
 
 ### Hybrid Code Search
+
 ```bash
 npm run search -- --project engineering-crm --query "Project budget validation"
 ```
 
 ### Full AI Task Context
+
 ```bash
 npm run context -- --project engineering-crm --task "Add department-based permission checking to project creation"
 ```
 
 ### Dependency Impact Analysis
+
 ```bash
 npm run impact -- --project engineering-crm --target "Project"
 ```
@@ -181,10 +205,7 @@ Add the following to your Google Antigravity MCP settings (`mcp_config.json`):
   "mcpServers": {
     "code-context-mcp": {
       "command": "node",
-      "args": [
-        "C:/laragon/www/RAG/dist/cli/index.js",
-        "mcp"
-      ],
+      "args": ["C:/laragon/www/RAG/dist/cli/index.js", "mcp"],
       "env": {
         "NODE_ENV": "production",
         "DB_HOST": "127.0.0.1",
@@ -215,10 +236,13 @@ Add the following to your Google Antigravity MCP settings (`mcp_config.json`):
 ## 8. Automated Testing
 
 Run the automated test suite:
+
 ```bash
 npm test
 ```
+
 The test suite includes 23 unit and integration tests verifying:
+
 - PHP / Laravel AST parsing (classes, methods, relationships, routes, migrations)
 - React / TypeScript AST parsing (components, hooks, imports, JSX elements)
 - SQL schema parsing (tables, columns, primary & foreign keys)
@@ -241,3 +265,33 @@ The test suite includes 23 unit and integration tests verifying:
 - [docs/development-guide.md](docs/development-guide.md): Directory structure, coding conventions, and developer workflows.
 - [docs/mcp-setup.md](docs/mcp-setup.md): Guide for connecting to Google Antigravity.
 - [docs/rag-flow.md](docs/rag-flow.md): In-depth walkthrough of chunking, vector storage, and hybrid retrieval.
+
+=====================================
+
+# Check database migration status & apply migrations
+
+npm run db:status
+npm run migrate
+
+# Check local services connectivity (MySQL 8.4, Qdrant, Ollama)
+
+npm run health
+
+# Register a codebase
+
+npm run project:add -- --id engineering-crm --name "Engineering CRM" --path "C:/path/to/project" --framework laravel
+
+# Index codebase (full or incremental)
+
+npm run index:full -- --project engineering-crm
+npm run index:incremental -- --project engineering-crm
+
+# Search code & inspect AI task context
+
+npm run search -- --project engineering-crm --query "Project budget validation"
+npm run context -- --project engineering-crm --task "Add department permission checking"
+npm run impact -- --project engineering-crm --target "Project"
+
+# Start the MCP server (for Google Antigravity)
+
+npm run mcp

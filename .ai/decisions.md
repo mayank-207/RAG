@@ -15,3 +15,4 @@
 ## ADR-004: AST-First Parsing with Fallback Chunker
 - **Decision**: Parse PHP via `php-parser` and JS/TS/React via `@babel/parser`.
 - **Rationale**: Accurate identification of classes, methods, components, and hooks. If a file contains invalid syntax, a line-bounded fallback chunker preserves indexed coverage.
+

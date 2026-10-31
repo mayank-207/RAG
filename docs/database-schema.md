@@ -236,3 +236,4 @@ Tracks indexing lifecycle, diagnostics, and failure recovery.
   - `message` TEXT NOT NULL
   - `stack_trace` TEXT NULL
   - `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+

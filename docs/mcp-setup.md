@@ -114,3 +114,4 @@ To verify that the MCP server runs and responds to standard JSON-RPC:
 npm run mcp
 ```
 The server will start and wait for standard input JSON-RPC messages (e.g. `tools/list`).
+

@@ -42,3 +42,4 @@ class ProjectController
         return response()->json($project);
     }
 }
+

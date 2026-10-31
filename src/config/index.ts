@@ -103,3 +103,4 @@ export function loadConfig(): AppConfig {
 }
 
 export const config = loadConfig();
+

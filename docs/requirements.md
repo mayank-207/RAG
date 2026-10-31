@@ -93,3 +93,4 @@ Command-line interface with commands for:
 ### 4.8. Testing & Verification
 - Synthetic test fixtures for Laravel/PHP and React/TypeScript.
 - End-to-end unit and integration tests covering migrations, parsing, chunking, search, impact, incremental changes, secret safety, and MCP tools.
+

@@ -14,3 +14,4 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({ id, title, status }) =
     </div>
   );
 };
+

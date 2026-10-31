@@ -31,3 +31,4 @@ export interface CuratedMemoryHit {
   sourceFile: string | null;
   score: number;
 }
+

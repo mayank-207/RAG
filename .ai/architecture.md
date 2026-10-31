@@ -10,3 +10,4 @@
 4. **Hybrid RAG Search Engine**: Weighted Reciprocal Rank Fusion of exact symbols, file paths, MySQL FULLTEXT, and Qdrant vector semantic results.
 5. **Dependency & Impact Engine**: Bi-directional graph mapper analyzing caller/callee, route/controller, and model/table relationships.
 6. **Persistence**: MySQL 8.4 as the sole relational database, Qdrant as the vector store, and Ollama as the local embedding engine.
+

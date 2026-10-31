@@ -23,3 +23,4 @@ src/
 ├── mcp/              # MCP Server definition & tool handlers
 └── cli/              # Command line commands
 ```
+

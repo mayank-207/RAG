@@ -79,3 +79,4 @@ Tests run against synthetic fixtures in `tests/fixtures/` and test:
   ```bash
   npm run <command>
   ```
+

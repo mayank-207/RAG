@@ -9,3 +9,4 @@
 ## 2. Windows Path Handling
 - **Issue**: Backslashes vs forward slashes in Windows file paths.
 - **Handling**: All relative and absolute paths are normalized with POSIX-style forward slashes (`path.posix.normalize`) to ensure cross-platform compatibility across Windows and Linux.
+
