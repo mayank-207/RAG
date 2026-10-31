@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>code-context-mcp Admin Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+
+  <!-- Login Modal / Screen -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h2>code-context-mcp</h2>
+        <span class="badge">Local Admin</span>
+      </div>
+      <p class="login-sub">Sign in to manage projects, indexing, and AI providers</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" value="admin" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <div id="login-error" class="alert alert-danger hidden"></div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+      </form>
+      <div class="login-hint">Default initial credentials: <code>admin</code> / <code>admin123</code></div>
+    </div>
+  </div>
+
+  <!-- Main App Shell -->
+  <div id="app-shell" class="app-layout hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span class="brand-title">code-context-mcp</span>
+        </div>
+        <span class="version-tag">v1.0</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">CORE</div>
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#projects" class="nav-item" data-view="projects">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+          <span>Projects</span>
+        </a>
+
+        <div class="nav-section-label">CODE EXPLORER</div>
+        <a href="#files" class="nav-item" data-view="files">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+          <span>Indexed Files</span>
+        </a>
+        <a href="#chunks" class="nav-item" data-view="chunks">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span>
+          <span>Code Chunks</span>
+        </a>
+        <a href="#symbols" class="nav-item" data-view="symbols">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></span>
+          <span>Symbols</span>
+        </a>
+        <a href="#dependencies" class="nav-item" data-view="dependencies">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+          <span>Dependencies</span>
+        </a>
+
+        <div class="nav-section-label">ENGINE & AI</div>
+        <a href="#indexing" class="nav-item" data-view="indexing">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+          <span>Indexing Management</span>
+        </a>
+        <a href="#ai-models" class="nav-item" data-view="ai-models">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span>AI Model Providers</span>
+        </a>
+        <a href="#embedding-settings" class="nav-item" data-view="embedding-settings">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></span>
+          <span>Embedding Settings</span>
+        </a>
+
+        <div class="nav-section-label">SYSTEM</div>
+        <a href="#system" class="nav-item" data-view="system">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span>System Settings</span>
+        </a>
+        <a href="#logs" class="nav-item" data-view="logs">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span>Logs & Errors</span>
+        </a>
+        <a href="#docs" class="nav-item" data-view="docs">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+          <span>Documentation</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <span class="user-avatar">AD</span>
+          <div class="user-meta">
+            <span class="user-name" id="user-display-name">admin</span>
+            <span class="user-role">Localhost</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn btn-ghost btn-sm" title="Sign Out">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title" class="page-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <div id="service-pill-mysql" class="service-pill checking">
+            <span class="dot"></span> MySQL 8.4
+          </div>
+          <div id="service-pill-qdrant" class="service-pill checking">
+            <span class="dot"></span> Qdrant
+          </div>
+          <div id="service-pill-ollama" class="service-pill checking">
+            <span class="dot"></span> Ollama
+          </div>
+          <div id="service-pill-mcp" class="service-pill connected">
+            <span class="dot"></span> MCP stdio
+          </div>
+          <button id="refresh-global-btn" class="btn btn-secondary btn-sm" title="Refresh all statistics">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="content-body">
+        
+        <!-- View 1: Dashboard -->
+        <section id="view-dashboard" class="view-panel active">
+          <!-- Summary Cards Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Registered Projects</span>
+                <span class="stat-value" id="stat-total-projects">-</span>
+                <span class="stat-sub" id="stat-connected-projects">Connected: -</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Indexed Projects</span>
+                <span class="stat-value" id="stat-indexed-projects">-</span>
+                <span class="stat-sub" id="stat-pending-projects">Pending: -</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Indexed Files</span>
+                <span class="stat-value" id="stat-total-files">-</span>
+                <span class="stat-sub">Across all workspaces</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Code Chunks</span>
+                <span class="stat-value" id="stat-total-chunks">-</span>
+                <span class="stat-sub" id="stat-total-embeddings">Embeddings: -</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon cyan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Extracted Symbols</span>
+                <span class="stat-value" id="stat-total-symbols">-</span>
+                <span class="stat-sub">Classes, methods & routes</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon yellow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg></div>
+              <div class="stat-meta">
+                <span class="stat-label">Last Successful Index</span>
+                <span class="stat-value text-sm" id="stat-last-index">Never</span>
+                <span class="stat-sub" id="stat-active-model">AI Model: -</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Status -->
+          <div class="dashboard-split">
+            <div class="card flex-1">
+              <div class="card-header">
+                <h3>Registered Codebases</h3>
+                <a href="#projects" class="btn btn-secondary btn-sm">View All</a>
+              </div>
+              <div class="card-body p-0">
+                <table class="table" id="dashboard-projects-table">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Framework</th>
+                      <th>Files</th>
+                      <th>Chunks</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="6" class="text-center text-muted">Loading projects...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card flex-1">
+              <div class="card-header">
+                <h3>System Service Diagnostics</h3>
+                <button class="btn btn-secondary btn-sm" id="refresh-services-btn">Check</button>
+              </div>
+              <div class="card-body">
+                <div class="service-check-list" id="dashboard-services-list">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 2: Projects -->
+        <section id="view-projects" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Projects Management</h2>
+              <p class="panel-sub">Register, inspect, and trigger indexing on your local codebases</p>
+            </div>
+            <button id="open-register-modal-btn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Register New Project
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table" id="projects-table">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Path</th>
+                    <th>Framework</th>
+                    <th>Branch</th>
+                    <th>Files</th>
+                    <th>Chunks</th>
+                    <th>Last Indexed</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 3: Project Detail View -->
+        <section id="view-project-detail" class="view-panel">
+          <div class="panel-header">
+            <div class="detail-header-meta">
+              <a href="#projects" class="btn btn-ghost btn-sm mb-2">← Back to Projects</a>
+              <h2 id="pd-name">Project Details</h2>
+              <span class="mono text-muted" id="pd-path">/path</span>
+            </div>
+            <div class="detail-header-actions">
+              <button class="btn btn-primary btn-sm" id="pd-full-index-btn">Full Index</button>
+              <button class="btn btn-secondary btn-sm" id="pd-inc-index-btn">Incremental Index</button>
+              <button class="btn btn-danger btn-sm" id="pd-purge-index-btn">Purge Index Data</button>
+            </div>
+          </div>
+
+          <!-- Project Detail Tabs -->
+          <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="pd-tab-overview">Overview</button>
+            <button class="tab-btn" data-tab="pd-tab-files">Files</button>
+            <button class="tab-btn" data-tab="pd-tab-chunks">Chunks</button>
+            <button class="tab-btn" data-tab="pd-tab-symbols">Symbols</button>
+            <button class="tab-btn" data-tab="pd-tab-deps">Dependencies</button>
+            <button class="tab-btn" data-tab="pd-tab-jobs">Indexing History</button>
+            <button class="tab-btn" data-tab="pd-tab-errors">Errors & Logs</button>
+          </div>
+
+          <div class="tabs-content">
+            <div id="pd-tab-overview" class="tab-pane active">
+              <div class="overview-grid" id="pd-overview-content">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+            <div id="pd-tab-files" class="tab-pane">
+              <div class="table-container" id="pd-files-container">Loading files...</div>
+            </div>
+            <div id="pd-tab-chunks" class="tab-pane">
+              <div class="table-container" id="pd-chunks-container">Loading chunks...</div>
+            </div>
+            <div id="pd-tab-symbols" class="tab-pane">
+              <div class="table-container" id="pd-symbols-container">Loading symbols...</div>
+            </div>
+            <div id="pd-tab-deps" class="tab-pane">
+              <div class="table-container" id="pd-deps-container">Loading dependencies...</div>
+            </div>
+            <div id="pd-tab-jobs" class="tab-pane">
+              <div class="table-container" id="pd-jobs-container">Loading history...</div>
+            </div>
+            <div id="pd-tab-errors" class="tab-pane">
+              <div class="table-container" id="pd-errors-container">Loading errors...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 4: Indexed Files -->
+        <section id="view-files" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Indexed Files Management</h2>
+              <p class="panel-sub">Inspect, filter, and reindex individual source files</p>
+            </div>
+            <div class="filter-group">
+              <input type="text" id="files-search-input" class="form-control" placeholder="Search file path...">
+              <select id="files-project-filter" class="form-control">
+                <option value="">All Projects</option>
+              </select>
+              <select id="files-ext-filter" class="form-control">
+                <option value="">All Extensions</option>
+                <option value=".php">.php</option>
+                <option value=".ts">.ts</option>
+                <option value=".tsx">.tsx</option>
+                <option value=".js">.js</option>
+                <option value=".jsx">.jsx</option>
+                <option value=".sql">.sql</option>
+                <option value=".md">.md</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table" id="files-table">
+                <thead>
+                  <tr>
+                    <th>Relative Path</th>
+                    <th>Project</th>
+                    <th>Language</th>
+                    <th>Size</th>
+                    <th>Chunks</th>
+                    <th>Last Indexed</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="7" class="text-center text-muted">Loading files...</td></tr>
+                </tbody>
+              </table>
+              <div class="pagination-bar" id="files-pagination"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 5: Code Chunks -->
+        <section id="view-chunks" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Code Chunks & Snippets</h2>
+              <p class="panel-sub">Inspect segmented code blocks and embedding synchronization status</p>
+            </div>
+            <div class="filter-group">
+              <input type="text" id="chunks-search-input" class="form-control" placeholder="Search chunk content or symbol...">
+              <select id="chunks-project-filter" class="form-control">
+                <option value="">All Projects</option>
+              </select>
+              <select id="chunks-type-filter" class="form-control">
+                <option value="">All Types</option>
+                <option value="method">Method</option>
+                <option value="function">Function</option>
+                <option value="class">Class</option>
+                <option value="component">Component</option>
+                <option value="hook">Hook</option>
+                <option value="doc_section">Documentation</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table" id="chunks-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>File & Lines</th>
+                    <th>Language</th>
+                    <th>Preview</th>
+                    <th>Vectors</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="7" class="text-center text-muted">Loading chunks...</td></tr>
+                </tbody>
+              </table>
+              <div class="pagination-bar" id="chunks-pagination"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 6: Symbols -->
+        <section id="view-symbols" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Code Symbols</h2>
+              <p class="panel-sub">Classes, methods, functions, components, hooks, and routes extracted via AST</p>
+            </div>
+            <div class="filter-group">
+              <input type="text" id="symbols-search-input" class="form-control" placeholder="Search symbol name or signature...">
+              <select id="symbols-project-filter" class="form-control">
+                <option value="">All Projects</option>
+              </select>
+              <select id="symbols-kind-filter" class="form-control">
+                <option value="">All Kinds</option>
+                <option value="class">Class</option>
+                <option value="method">Method</option>
+                <option value="function">Function</option>
+                <option value="component">Component</option>
+                <option value="hook">Hook</option>
+                <option value="model">Model</option>
+                <option value="controller">Controller</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table" id="symbols-table">
+                <thead>
+                  <tr>
+                    <th>Symbol Name</th>
+                    <th>Kind</th>
+                    <th>Namespace / Parent</th>
+                    <th>File</th>
+                    <th>Lines</th>
+                    <th>Signature</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="6" class="text-center text-muted">Loading symbols...</td></tr>
+                </tbody>
+              </table>
+              <div class="pagination-bar" id="symbols-pagination"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 7: Dependencies -->
+        <section id="view-dependencies" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Dependency & Impact Graph</h2>
+              <p class="panel-sub">Extracted caller-callee, route-controller, model-table, and import linkages</p>
+            </div>
+            <div class="filter-group">
+              <input type="text" id="deps-search-input" class="form-control" placeholder="Search source or target...">
+              <select id="deps-project-filter" class="form-control">
+                <option value="">All Projects</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table" id="deps-table">
+                <thead>
+                  <tr>
+                    <th>Source Node</th>
+                    <th>Source Type</th>
+                    <th>Relationship</th>
+                    <th>Target Node</th>
+                    <th>Target Type</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="6" class="text-center text-muted">Loading dependencies...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 8: Indexing Management -->
+        <section id="view-indexing" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Indexing Management</h2>
+              <p class="panel-sub">Monitor active jobs, historical durations, and trigger index rebuilds</p>
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3>Trigger Indexing Job</h3>
+            </div>
+            <div class="card-body">
+              <form id="trigger-index-form" class="inline-form">
+                <div class="form-group flex-1">
+                  <label for="idx-project-select">Select Project</label>
+                  <select id="idx-project-select" class="form-control" required></select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="idx-mode-select">Indexing Mode</label>
+                  <select id="idx-mode-select" class="form-control">
+                    <option value="incremental">Incremental (Only modified & new files - Fast)</option>
+                    <option value="full">Full Rebuild (Scan and parse all files)</option>
+                  </select>
+                </div>
+                <div class="form-group align-end">
+                  <button type="submit" class="btn btn-primary" id="trigger-index-btn">Start Indexing</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Indexing Jobs History</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table" id="indexing-jobs-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Project</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Scanned</th>
+                    <th>Indexed</th>
+                    <th>Chunks</th>
+                    <th>Vectors</th>
+                    <th>Started</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="10" class="text-center text-muted">Loading jobs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 9: AI Model Settings -->
+        <section id="view-ai-models" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>AI Model Providers & Settings</h2>
+              <p class="panel-sub">Configure OpenAI, Gemini, Claude, and local Ollama with secure AES-256 encrypted keys</p>
+            </div>
+            <button id="open-provider-modal-btn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Provider
+            </button>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3>Configured Model Providers</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table" id="providers-table">
+                <thead>
+                  <tr>
+                    <th>Provider Name</th>
+                    <th>Type</th>
+                    <th>API Key</th>
+                    <th>Base URL</th>
+                    <th>Default Model</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="7" class="text-center text-muted">Loading providers...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Task-Specific Model Assignments</h3>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">Assign different AI models to specialized assistant tasks:</p>
+              <form id="model-assignments-form">
+                <div class="assignment-grid" id="assignment-grid">
+                  <!-- Populated dynamically -->
+                </div>
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary">Save Model Assignments</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 10: Embedding Settings -->
+        <section id="view-embedding-settings" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Embedding Settings</h2>
+              <p class="panel-sub">Manage local vector embeddings strictly separate from chat/generation models</p>
+            </div>
+          </div>
+
+          <div class="card max-w-2xl">
+            <div class="card-body">
+              <div class="alert alert-info mb-4">
+                <strong>Embedding Isolation:</strong> Embedding models convert code into dense mathematical vectors stored in Qdrant. They are strictly separate from chat/generation models.
+              </div>
+
+              <form id="embedding-settings-form">
+                <div class="form-group">
+                  <label for="emb-provider">Embedding Provider</label>
+                  <input type="text" id="emb-provider" class="form-control" value="ollama" readonly>
+                  <small class="text-muted">Local Ollama is the default local embedding provider.</small>
+                </div>
+                <div class="form-group">
+                  <label for="emb-model">Embedding Model Name</label>
+                  <input type="text" id="emb-model" class="form-control" required value="nomic-embed-text">
+                  <small class="text-muted">Default: <code>nomic-embed-text</code> (or <code>all-minilm</code>, <code>mxbai-embed-large</code>)</small>
+                </div>
+                <div class="form-group">
+                  <label for="emb-dimensions">Vector Dimensions</label>
+                  <input type="number" id="emb-dimensions" class="form-control" required value="768">
+                  <small class="text-muted">Must match model output (e.g. 768 for nomic-embed-text, 384 for all-minilm, 1024 for mxbai).</small>
+                </div>
+                <div class="form-group">
+                  <label for="emb-batch-size">Batch Size</label>
+                  <input type="number" id="emb-batch-size" class="form-control" required value="32">
+                  <small class="text-muted">Number of chunks embedded per batch request.</small>
+                </div>
+
+                <div id="emb-reindex-warning" class="alert alert-warning hidden mt-3">
+                  <strong>Warning:</strong> Changing the embedding model or vector dimensions requires rebuilding existing Qdrant vector collections.
+                </div>
+
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary" id="save-emb-settings-btn">Save Embedding Settings</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 11: System Settings -->
+        <section id="view-system" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>System Settings & Diagnostics</h2>
+              <p class="panel-sub">Live health and configuration for MySQL 8.4, Qdrant, Ollama, and MCP</p>
+            </div>
+          </div>
+
+          <div class="system-cards-grid" id="system-cards-container">
+            <!-- Populated dynamically -->
+          </div>
+        </section>
+
+        <!-- View 12: Logs & Errors -->
+        <section id="view-logs" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Error Logs & Diagnostics</h2>
+              <p class="panel-sub">Review indexing exceptions, parser errors, and retrieval diagnostics</p>
+            </div>
+            <button id="refresh-logs-btn" class="btn btn-secondary btn-sm">Refresh Logs</button>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3>Recent Error Logs</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table" id="error-logs-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Project</th>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Message</th>
+                    <th>Stack Trace</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="6" class="text-center text-muted">Loading logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent RAG Retrieval Queries</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table" id="retrieval-logs-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Project</th>
+                    <th>Query Text</th>
+                    <th>Execution Time</th>
+                    <th>Results Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5" class="text-center text-muted">Loading logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 13: Documentation -->
+        <section id="view-docs" class="view-panel">
+          <div class="panel-header">
+            <div>
+              <h2>System Documentation & Guides</h2>
+              <p class="panel-sub">Complete technical reference, setup instructions, and Antigravity MCP integration</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body markdown-body" id="docs-content">
+              <h3>Welcome to code-context-mcp Local Admin</h3>
+              <p>This dashboard is a dedicated local management console for your codebase RAG and MCP server.</p>
+              <h4>Key Documentation Links:</h4>
+              <ul>
+                <li><strong>Architecture:</strong> <code>docs/architecture.md</code></li>
+                <li><strong>Database Schema:</strong> <code>docs/database-schema.md</code> (MySQL 8.4 normalized schema)</li>
+                <li><strong>Setup Guide:</strong> <code>docs/setup-guide.md</code> (Windows & Linux installation)</li>
+                <li><strong>Antigravity MCP Setup:</strong> <code>docs/mcp-setup.md</code> (Connecting MCP stdio transport)</li>
+                <li><strong>RAG Flow:</strong> <code>docs/rag-flow.md</code> (Chunking, AST parsing, and Reciprocal Rank Fusion)</li>
+                <li><strong>Admin Dashboard:</strong> <code>docs/admin-dashboard.md</code> (Dashboard usage and management)</li>
+                <li><strong>AI Model Configuration:</strong> <code>docs/ai-model-configuration.md</code> (OpenAI, Gemini, Claude, Ollama setup)</li>
+                <li><strong>Security & API Keys:</strong> <code>docs/security.md</code> (AES-256-GCM encryption & project isolation)</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Register Project Modal -->
+  <div id="register-project-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register Local Project</h3>
+        <button class="modal-close-btn" id="close-reg-modal">&times;</button>
+      </div>
+      <form id="register-project-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="reg-path">Project Root Path (Absolute)</label>
+            <input type="text" id="reg-path" class="form-control" required placeholder="C:/laragon/www/my-project">
+            <small class="text-muted">The local absolute directory of your codebase.</small>
+          </div>
+          <div class="form-group">
+            <label for="reg-name">Project Display Name</label>
+            <input type="text" id="reg-name" class="form-control" required placeholder="My Application">
+          </div>
+          <div class="form-group">
+            <label for="reg-id">Project Identifier (Slug)</label>
+            <input type="text" id="reg-id" class="form-control" placeholder="my-app">
+            <small class="text-muted">Leave blank to auto-generate from name.</small>
+          </div>
+          <div class="form-group">
+            <label for="reg-framework">Framework / Type</label>
+            <select id="reg-framework" class="form-control">
+              <option value="auto">Auto-detect (Recommended)</option>
+              <option value="laravel">Laravel / PHP</option>
+              <option value="react">React / TypeScript</option>
+              <option value="node">Node.js / Express</option>
+              <option value="generic">Generic / Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-desc">Description (Optional)</label>
+            <textarea id="reg-desc" class="form-control" rows="2" placeholder="Brief notes on project domain..."></textarea>
+          </div>
+          <div id="reg-error" class="alert alert-danger hidden"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-reg-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- AI Provider Modal -->
+  <div id="provider-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="provider-modal-title">Configure AI Provider</h3>
+        <button class="modal-close-btn" id="close-provider-modal">&times;</button>
+      </div>
+      <form id="provider-form">
+        <div class="modal-body">
+          <input type="hidden" id="prov-id">
+          <div class="form-group">
+            <label for="prov-name">Provider Name</label>
+            <input type="text" id="prov-name" class="form-control" required placeholder="OpenAI">
+          </div>
+          <div class="form-group">
+            <label for="prov-type">Provider Type</label>
+            <select id="prov-type" class="form-control" required>
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="ollama">Local Ollama</option>
+              <option value="openai_compatible">OpenAI Compatible (Custom URL)</option>
+            </select>
+          </div>
+          <div class="form-group" id="prov-key-group">
+            <label for="prov-key">API Key</label>
+            <input type="password" id="prov-key" class="form-control" placeholder="Enter API Key (Encrypted with AES-256)">
+            <small class="text-muted" id="prov-key-hint">Leave blank to keep existing encrypted key.</small>
+          </div>
+          <div class="form-group" id="prov-url-group">
+            <label for="prov-url">Base URL</label>
+            <input type="text" id="prov-url" class="form-control" placeholder="https://api.openai.com/v1">
+          </div>
+          <div class="form-group">
+            <label for="prov-model">Default Model Name</label>
+            <input type="text" id="prov-model" class="form-control" placeholder="gpt-4o-mini">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="prov-enabled" checked>
+              <span>Enable this provider</span>
+            </label>
+          </div>
+          <div id="prov-test-feedback" class="alert hidden"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="test-prov-btn">Test Connection</button>
+          <button type="submit" class="btn btn-primary">Save Provider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chunk Inspect Modal -->
+  <div id="chunk-modal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3 id="chunk-modal-title">Inspect Code Chunk</h3>
+        <button class="modal-close-btn" id="close-chunk-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="chunk-meta-bar" id="chunk-meta"></div>
+        <pre class="code-viewer"><code id="chunk-content-code"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="close-chunk-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
+

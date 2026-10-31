@@ -50,6 +50,18 @@ const configSchema = z.object({
     vectorWeight: z.coerce.number().default(0.30),
     maxResults: z.coerce.number().default(20),
   }),
+
+  // Admin Dashboard Configuration
+  dashboard: z.object({
+    port: z.coerce.number().default(3000),
+    host: z.string().default('127.0.0.1'),
+    adminInitialPassword: z.string().default('admin123'),
+  }),
+
+  // Secret Encryption Key for Provider API Keys
+  security: z.object({
+    encryptionKey: z.string().default('c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2'),
+  }),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
@@ -87,6 +99,14 @@ export function loadConfig(): AppConfig {
       fulltextWeight: process.env.SEARCH_FULLTEXT_WEIGHT,
       vectorWeight: process.env.SEARCH_VECTOR_WEIGHT,
       maxResults: process.env.SEARCH_MAX_RESULTS,
+    },
+    dashboard: {
+      port: process.env.DASHBOARD_PORT,
+      host: process.env.DASHBOARD_HOST,
+      adminInitialPassword: process.env.ADMIN_INITIAL_PASSWORD,
+    },
+    security: {
+      encryptionKey: process.env.ENCRYPTION_KEY,
     },
   };
 
