@@ -279,11 +279,11 @@ npm run health
 
 # Register a codebase
 
-npm run project:add -- --id engineering-crm --name "Engineering CRM" --path "C:/path/to/project" --framework laravel
+npm run project:add -- --id crm --name "CRM Application" --path "C:/laragon/www/crm" --framework laravel
 
 # Index codebase (full or incremental)
 
-npm run index:full -- --project engineering-crm
+npm run index:full -- --project crm
 npm run index:incremental -- --project engineering-crm
 
 # Search code & inspect AI task context
@@ -295,14 +295,3 @@ npm run impact -- --project engineering-crm --target "Project"
 # Start the MCP server (for Google Antigravity)
 
 npm run mcp
-
-=====================
-Register project::
-
-# ૧. પ્રોજેક્ટ રજીસ્ટર કરો
-
-npm run project:add -- --id my-crm --name "Accounting CRM" --path "C:/laragon/www/accounting-crm"
-
-# ૨. કોડ ઇન્ડેક્સ (વાંચીને સેવ) કરો
-
-npm run index:full -- --project my-crm
