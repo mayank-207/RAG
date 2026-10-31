@@ -14,9 +14,17 @@ export class GeminiProvider extends BaseAIProvider {
     return { valid: errors.length === 0, errors };
   }
 
+  private getNormalizedBaseUrl(url?: string): string {
+    const raw = (url || '').trim();
+    if (!raw || raw.includes(':11434')) {
+      return 'https://generativelanguage.googleapis.com/v1beta';
+    }
+    return raw.replace(/\/+$/, '');
+  }
+
   public async testConnection(cfg: ProviderConfig): Promise<ConnectionTestResult> {
     const start = Date.now();
-    const baseUrl = (cfg.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+    const baseUrl = this.getNormalizedBaseUrl(cfg.baseUrl);
 
     if (!cfg.apiKey) {
       return { ok: false, message: 'Gemini API key is missing', latencyMs: 0, error: 'NO_API_KEY' };
@@ -48,6 +56,10 @@ export class GeminiProvider extends BaseAIProvider {
         .map((m) => m.name.replace('models/', ''))
         .filter((name) => name.includes('gemini'));
 
+      const modelTested = cfg.defaultModel && cfg.defaultModel.includes('gemini')
+        ? cfg.defaultModel
+        : (models[0] || 'gemini-2.0-flash');
+
       return {
         ok: true,
         message: `Successfully connected to Google Gemini (${models.length} model(s) available)`,
@@ -65,7 +77,7 @@ export class GeminiProvider extends BaseAIProvider {
   }
 
   public async listModels(cfg: ProviderConfig): Promise<ProviderModel[]> {
-    const baseUrl = (cfg.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+    const baseUrl = this.getNormalizedBaseUrl(cfg.baseUrl);
     if (!cfg.apiKey) return this.getDefaultModels();
 
     try {
@@ -98,8 +110,11 @@ export class GeminiProvider extends BaseAIProvider {
   }
 
   public async generateResponse(prompt: string, options?: { systemPrompt?: string; model?: string }): Promise<GenerationResult> {
-    const baseUrl = (this.config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
-    const model = options?.model || this.config.defaultModel || 'gemini-2.0-flash';
+    const baseUrl = this.getNormalizedBaseUrl(this.config.baseUrl);
+    let model = options?.model || this.config.defaultModel || 'gemini-2.0-flash';
+    if (!model.toLowerCase().includes('gemini')) {
+      model = 'gemini-2.0-flash';
+    }
 
     const body: any = {
       contents: [

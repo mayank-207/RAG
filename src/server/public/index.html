@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>code-context-mcp Admin Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=1.0.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,6 @@
         <div id="login-error" class="alert alert-danger hidden"></div>
         <button type="submit" class="btn btn-primary btn-block">Sign In</button>
       </form>
-      <div class="login-hint">Default initial credentials: <code>admin</code> / <code>admin123</code></div>
     </div>
   </div>
 
@@ -864,7 +863,8 @@
           </div>
           <div class="form-group" id="prov-url-group">
             <label for="prov-url">Base URL</label>
-            <input type="text" id="prov-url" class="form-control" placeholder="https://api.openai.com/v1">
+            <input type="text" id="prov-url" class="form-control" placeholder="Leave blank for official API endpoint">
+            <small class="text-muted" id="prov-url-hint">Leave blank for official Google Gemini / OpenAI / Claude API endpoints.</small>
           </div>
           <div class="form-group">
             <label for="prov-model">Default Model Name</label>
@@ -903,7 +903,7 @@
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=1.0.2"></script>
 </body>
 </html>
 

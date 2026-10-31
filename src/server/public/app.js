@@ -1544,6 +1544,75 @@
   const provForm = document.getElementById('provider-form');
   const testProvBtn = document.getElementById('test-prov-btn');
   const provTestFeedback = document.getElementById('prov-test-feedback');
+  const provTypeSelect = document.getElementById('prov-type');
+
+  function applyProviderTypeDefaults(type, isNew = false) {
+    const provNameInput = document.getElementById('prov-name');
+    const provUrlInput = document.getElementById('prov-url');
+    const provModelInput = document.getElementById('prov-model');
+
+    if (type === 'gemini') {
+      if (isNew || !provNameInput.value || provNameInput.value === 'OpenAI' || provNameInput.value === 'Local Ollama') {
+        provNameInput.value = 'Google Gemini';
+      }
+      provUrlInput.placeholder = 'Leave blank for official Gemini API';
+      if (isNew || provUrlInput.value.includes(':11434') || provUrlInput.value.includes('openai.com')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'gemini-2.0-flash';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gpt') || provModelInput.value.includes('nomic')) {
+        provModelInput.value = 'gemini-2.0-flash';
+      }
+    } else if (type === 'openai') {
+      if (isNew || !provNameInput.value || provNameInput.value === 'Google Gemini' || provNameInput.value === 'Local Ollama') {
+        provNameInput.value = 'OpenAI';
+      }
+      provUrlInput.placeholder = 'Leave blank for official OpenAI API';
+      if (isNew || provUrlInput.value.includes(':11434')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'gpt-4o-mini';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gemini') || provModelInput.value.includes('nomic')) {
+        provModelInput.value = 'gpt-4o-mini';
+      }
+    } else if (type === 'anthropic') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Anthropic Claude';
+      }
+      provUrlInput.placeholder = 'Leave blank for official Anthropic API';
+      if (isNew || provUrlInput.value.includes(':11434')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'claude-3-5-sonnet-20241022';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gemini') || provModelInput.value.includes('gpt')) {
+        provModelInput.value = 'claude-3-5-sonnet-20241022';
+      }
+    } else if (type === 'ollama') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Local Ollama';
+      }
+      provUrlInput.placeholder = 'http://127.0.0.1:11434';
+      if (isNew || !provUrlInput.value) {
+        provUrlInput.value = 'http://127.0.0.1:11434';
+      }
+      provModelInput.placeholder = 'qwen2.5-coder:7b';
+      if (isNew || !provModelInput.value) {
+        provModelInput.value = 'qwen2.5-coder:7b';
+      }
+    } else if (type === 'openai_compatible') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Custom LLM Server';
+      }
+      provUrlInput.placeholder = 'https://api.together.xyz/v1 or local URL';
+      provModelInput.placeholder = 'model-name';
+    }
+  }
+
+  if (provTypeSelect) {
+    provTypeSelect.addEventListener('change', () => {
+      applyProviderTypeDefaults(provTypeSelect.value, false);
+    });
+  }
 
   function openProviderModal(existing = null) {
     provTestFeedback.classList.add('hidden');
@@ -1554,16 +1623,18 @@
       document.getElementById('provider-modal-title').textContent = 'Edit AI Provider';
       document.getElementById('prov-id').value = existing.id;
       document.getElementById('prov-name').value = existing.name;
-      document.getElementById('prov-type').value = existing.type;
+      document.getElementById('prov-type').value = existing.type || existing.provider_type;
       document.getElementById('prov-url').value = existing.base_url || '';
       document.getElementById('prov-model').value = existing.default_model || '';
       document.getElementById('prov-enabled').checked = Boolean(existing.is_enabled);
       document.getElementById('prov-key-hint').textContent = 'Leave blank to preserve the existing encrypted API key.';
+      applyProviderTypeDefaults(existing.type || existing.provider_type, false);
     } else {
       state.currentEditingProviderId = null;
       document.getElementById('provider-modal-title').textContent = 'Configure AI Provider';
       document.getElementById('prov-id').value = '';
       document.getElementById('prov-key-hint').textContent = 'Key is encrypted using AES-256-GCM before storage.';
+      applyProviderTypeDefaults(provTypeSelect.value, true);
     }
 
     provModal.classList.remove('hidden');
@@ -1583,9 +1654,13 @@
 
     const providerId = state.currentEditingProviderId;
     const type = document.getElementById('prov-type').value;
-    const apiKey = document.getElementById('prov-key').value;
-    const baseUrl = document.getElementById('prov-url').value;
-    const defaultModel = document.getElementById('prov-model').value;
+    const apiKey = document.getElementById('prov-key').value.trim();
+    let baseUrl = document.getElementById('prov-url').value.trim();
+    if (baseUrl && (type === 'gemini' || type === 'openai' || type === 'anthropic') && baseUrl.includes(':11434')) {
+      baseUrl = '';
+      document.getElementById('prov-url').value = '';
+    }
+    const defaultModel = document.getElementById('prov-model').value.trim();
 
     try {
       const endpoint = providerId ? `/api/ai/providers/${providerId}/test` : '/api/ai/providers/test';
@@ -1597,10 +1672,13 @@
       provTestFeedback.classList.remove('alert-info');
       if (result.ok) {
         provTestFeedback.classList.add('alert-success');
-        provTestFeedback.textContent = `✔ Connected! Latency: ${result.latencyMs}ms. Model: ${result.modelTested}`;
+        const modelsCount = result.modelsFound && result.modelsFound.length
+          ? ` (${result.modelsFound.length} model(s) available: ${result.modelsFound.slice(0, 3).join(', ')})`
+          : '';
+        provTestFeedback.textContent = `✔ Connected! Latency: ${result.latencyMs || 0}ms.${modelsCount}`;
       } else {
         provTestFeedback.classList.add('alert-danger');
-        provTestFeedback.textContent = `✖ Connection failed: ${result.error}`;
+        provTestFeedback.textContent = `✖ Connection failed: ${result.message || result.error || 'Check API key or network'}`;
       }
     } catch (err) {
       provTestFeedback.classList.remove('alert-info');
@@ -1611,11 +1689,14 @@
 
   provForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('prov-id').value || undefined;
+    const id = document.getElementById('prov-id').value.trim() || undefined;
     const name = document.getElementById('prov-name').value.trim();
     const type = document.getElementById('prov-type').value;
-    const apiKey = document.getElementById('prov-key').value || undefined;
-    const baseUrl = document.getElementById('prov-url').value.trim() || undefined;
+    const apiKey = document.getElementById('prov-key').value.trim() || undefined;
+    let baseUrl = document.getElementById('prov-url').value.trim() || undefined;
+    if (baseUrl && (type === 'gemini' || type === 'openai' || type === 'anthropic') && baseUrl.includes(':11434')) {
+      baseUrl = undefined;
+    }
     const defaultModel = document.getElementById('prov-model').value.trim() || undefined;
     const isEnabled = document.getElementById('prov-enabled').checked;
 

@@ -118,7 +118,7 @@ export class AIModelManager {
    * Encrypts the API key if provided.
    */
   public async saveProvider(data: {
-    id: string;
+    id?: string;
     name: string;
     providerType?: ProviderType;
     type?: ProviderType;
@@ -129,8 +129,13 @@ export class AIModelManager {
     defaultModel?: string;
     config?: any;
   }): Promise<any> {
-    const providerType = data.providerType || data.type || 'openai';
-    const existing = await this.getProviderConfig(data.id, true);
+    const providerType = (data.providerType || data.type || 'openai') as ProviderType;
+    const baseSlug = (data.name || providerType).toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 32);
+    const id = (data.id && data.id.trim())
+      ? data.id.trim()
+      : `${baseSlug}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+
+    const existing = await this.getProviderConfig(id, true);
 
     let encryptedKey: string | null = null;
     let maskedKey: string | null = null;
@@ -144,6 +149,28 @@ export class AIModelManager {
       const enc = encryptApiKey(existing.apiKey);
       encryptedKey = enc.encrypted;
       maskedKey = enc.masked;
+    }
+
+    if (providerType !== 'ollama' && !encryptedKey) {
+      throw new Error(`API key is required for ${providerType}`);
+    }
+
+    let baseUrl = data.baseUrl?.trim() || null;
+    if (baseUrl && (providerType === 'gemini' || providerType === 'openai' || providerType === 'anthropic')) {
+      if (baseUrl.includes(':11434')) {
+        baseUrl = null;
+      }
+    }
+
+    let defaultModel = data.defaultModel?.trim() || null;
+    if (providerType === 'gemini') {
+      if (!defaultModel || defaultModel.toLowerCase().includes('gpt') || defaultModel.includes('nomic')) {
+        defaultModel = 'gemini-2.0-flash';
+      }
+    } else if (providerType === 'openai') {
+      if (!defaultModel || defaultModel.toLowerCase().includes('gemini') || defaultModel.includes('nomic')) {
+        defaultModel = 'gpt-4o-mini';
+      }
     }
 
     const isEnabled = data.isEnabled !== undefined ? (data.isEnabled ? 1 : 0) : 1;
@@ -163,22 +190,22 @@ export class AIModelManager {
          default_model = VALUES(default_model),
          config = VALUES(config)`,
       [
-        data.id,
-        data.name,
+        id,
+        data.name || id,
         providerType,
         encryptedKey,
         maskedKey,
-        data.baseUrl || null,
+        baseUrl,
         data.apiVersion || null,
         isEnabled,
-        data.defaultModel || null,
+        defaultModel,
         data.config ? JSON.stringify(data.config) : null,
       ]
     );
 
     const updated = await query<mysql.RowDataPacket[]>(
       'SELECT id, name, provider_type, provider_type as type, api_key_masked, api_key_masked as masked_api_key, base_url, is_enabled, default_model, config, created_at, updated_at FROM ai_providers WHERE id = ?',
-      [data.id]
+      [id]
     );
     return updated[0];
   }
@@ -197,17 +224,33 @@ export class AIModelManager {
    * Tests connection to a provider using provided or saved credentials.
    */
   public async testProviderConnection(id: string, testConfig?: Partial<ProviderConfig>): Promise<ConnectionTestResult> {
-    const existing = await this.getProviderConfig(id, true);
+    const existing = (id && id.trim()) ? await this.getProviderConfig(id.trim(), true) : null;
+
+    const providerType = (testConfig?.providerType || (testConfig as any)?.type || existing?.providerType || 'gemini') as ProviderType;
+
+    let baseUrl = (testConfig?.baseUrl !== undefined ? testConfig.baseUrl : existing?.baseUrl)?.trim() || undefined;
+    if (baseUrl && (providerType === 'gemini' || providerType === 'openai' || providerType === 'anthropic')) {
+      if (baseUrl.includes(':11434')) {
+        baseUrl = undefined;
+      }
+    }
+
+    let defaultModel = (testConfig?.defaultModel !== undefined ? testConfig.defaultModel : existing?.defaultModel)?.trim() || undefined;
+    if (providerType === 'gemini') {
+      if (!defaultModel || defaultModel.toLowerCase().includes('gpt') || defaultModel.includes('nomic')) {
+        defaultModel = 'gemini-2.0-flash';
+      }
+    }
 
     const mergedConfig: ProviderConfig = {
-      id,
-      name: testConfig?.name || existing?.name || id,
-      providerType: testConfig?.providerType || existing?.providerType || 'ollama',
-      apiKey: testConfig?.apiKey || existing?.apiKey,
-      baseUrl: testConfig?.baseUrl || existing?.baseUrl,
-      apiVersion: testConfig?.apiVersion || existing?.apiVersion,
+      id: id || 'test_provider',
+      name: testConfig?.name || existing?.name || id || 'Test Provider',
+      providerType,
+      apiKey: testConfig?.apiKey !== undefined ? testConfig.apiKey : existing?.apiKey,
+      baseUrl,
+      apiVersion: testConfig?.apiVersion !== undefined ? testConfig.apiVersion : existing?.apiVersion,
       isEnabled: true,
-      defaultModel: testConfig?.defaultModel || existing?.defaultModel,
+      defaultModel,
     };
 
     const instance = this.createProviderInstance(mergedConfig);
