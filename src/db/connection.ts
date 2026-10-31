@@ -59,6 +59,23 @@ export async function withTransaction<T>(callback: (conn: mysql.PoolConnection) 
   }
 }
 
+export async function ensureDatabaseExists(): Promise<void> {
+  try {
+    const rootConn = await mysql.createConnection({
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+    });
+    await rootConn.query(
+      `CREATE DATABASE IF NOT EXISTS \`${config.db.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+    );
+    await rootConn.end();
+  } catch (err: any) {
+    logger.debug({ err: err?.message }, 'Could not run CREATE DATABASE IF NOT EXISTS check');
+  }
+}
+
 export async function testDbConnection(): Promise<{ ok: boolean; version?: string; error?: string }> {
   try {
     const p = getDbPool();

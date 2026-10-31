@@ -76,6 +76,14 @@ export function createServerApp() {
 }
 
 export async function startDashboardServer(port: number = 3000, host: string = '127.0.0.1') {
+  // Ensure database and schema are initialized
+  try {
+    const { ensureDatabaseExists } = await import('../db/connection.js');
+    await ensureDatabaseExists();
+    const { runMigrations } = await import('../db/migrate.js');
+    await runMigrations();
+  } catch {}
+
   await AuthService.ensureDefaultAdmin();
   await ensureQdrantRunning().catch(() => {});
 

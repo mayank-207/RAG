@@ -28,6 +28,7 @@ const configSchema = z.object({
 
   // Ollama Embeddings
   ollama: z.object({
+    enabled: z.coerce.boolean().default(true),
     url: z.string().default('http://127.0.0.1:11434'),
     model: z.string().default('nomic-embed-text'),
     dimensions: z.coerce.number().default(768),
@@ -84,6 +85,7 @@ export function loadConfig(): AppConfig {
       collectionPrefix: process.env.QDRANT_COLLECTION_PREFIX,
     },
     ollama: {
+      enabled: process.env.OLLAMA_ENABLED !== undefined ? process.env.OLLAMA_ENABLED !== 'false' : true,
       url: process.env.OLLAMA_URL,
       model: process.env.OLLAMA_EMBED_MODEL,
       dimensions: process.env.OLLAMA_EMBED_DIMENSIONS,
