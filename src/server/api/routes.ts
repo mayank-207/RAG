@@ -618,6 +618,15 @@ apiRouter.post('/ai/providers', async (req: Request, res: Response) => {
   }
 });
 
+apiRouter.post('/ai/providers/test', async (req: Request, res: Response) => {
+  try {
+    const result = await aiManager.testProviderConnection('', req.body);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ ok: false, error: err?.message || String(err) });
+  }
+});
+
 apiRouter.post('/ai/providers/:id/test', async (req: Request, res: Response) => {
   try {
     const providerId = String(req.params.id);

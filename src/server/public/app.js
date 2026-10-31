@@ -1,152 +1,219 @@
 /**
  * code-context-mcp Local Admin Dashboard
  * Client-side Controller & Single-Page Application Router
+ * Modular Component Architecture
  */
 
-(function () {
-  'use strict';
+import { renderLayoutShell } from './components/Layout.js';
+import { renderLoginForm } from './components/LoginForm.js';
+import { renderModals } from './components/Modals.js';
+import { enhanceAllSelects } from './components/ShadcnSelect.js';
 
-  // State Management
-  const state = {
-    currentUser: null,
-    activeView: 'dashboard',
-    selectedProjectId: null,
-    projects: [],
-    filesFilter: { projectId: '', extension: '', search: '', page: 1, limit: 25 },
-    chunksFilter: { projectId: '', type: '', search: '', page: 1, limit: 20 },
-    symbolsFilter: { projectId: '', kind: '', search: '', page: 1, limit: 30 },
-    depsFilter: { projectId: '', search: '' },
-    currentEditingProviderId: null,
-  };
+import { renderDashboardView } from './views/DashboardView.js';
+import { renderProjectsView } from './views/ProjectsView.js';
+import { renderProjectDetailsView } from './views/ProjectDetailsView.js';
+import { renderFilesView } from './views/FilesView.js';
+import { renderChunksView } from './views/ChunksView.js';
+import { renderSymbolsView } from './views/SymbolsView.js';
+import { renderDependenciesView } from './views/DependenciesView.js';
+import { renderIndexingView } from './views/IndexingView.js';
+import { renderAIProvidersView } from './views/AIProvidersView.js';
+import { renderEmbeddingView } from './views/EmbeddingView.js';
+import { renderSystemView } from './views/SystemView.js';
+import { renderLogsView } from './views/LogsView.js';
+import { renderDocsView } from './views/DocsView.js';
 
-  // ==============================================================================
-  // 1. HTTP Client & Auth Utilities
-  // ==============================================================================
+// Mount all reusable components into the DOM
+function mountApp() {
+  const root = document.getElementById('app-root');
+  if (!root) return;
 
-  function getToken() {
-    return localStorage.getItem('code_context_token') || '';
+  root.innerHTML = `
+    ${renderLoginForm()}
+    ${renderLayoutShell()}
+    ${renderModals()}
+  `;
+
+  const viewsContainer = document.getElementById('views-container');
+  if (viewsContainer) {
+    viewsContainer.innerHTML = `
+      ${renderDashboardView()}
+      ${renderProjectsView()}
+      ${renderProjectDetailsView()}
+      ${renderFilesView()}
+      ${renderChunksView()}
+      ${renderSymbolsView()}
+      ${renderDependenciesView()}
+      ${renderIndexingView()}
+      ${renderAIProvidersView()}
+      ${renderEmbeddingView()}
+      ${renderSystemView()}
+      ${renderLogsView()}
+      ${renderDocsView()}
+    `;
+  }
+}
+
+mountApp();
+
+// State Management
+const state = {
+  currentUser: null,
+  activeView: 'dashboard',
+  selectedProjectId: null,
+  projects: [],
+  filesFilter: { projectId: '', extension: '', search: '', page: 1, limit: 25 },
+  chunksFilter: { projectId: '', type: '', search: '', page: 1, limit: 20 },
+  symbolsFilter: { projectId: '', kind: '', search: '', page: 1, limit: 30 },
+  depsFilter: { projectId: '', search: '' },
+  currentEditingProviderId: null,
+};
+
+// ==============================================================================
+// 1. HTTP Client & Auth Utilities
+// ==============================================================================
+
+function getToken() {
+  return localStorage.getItem('code_context_token') || '';
+}
+
+function setToken(token) {
+  if (token) localStorage.setItem('code_context_token', token);
+  else localStorage.removeItem('code_context_token');
+}
+
+async function apiFetch(endpoint, options = {}) {
+  const headers = options.headers || {};
+  const token = getToken();
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  function setToken(token) {
-    if (token) localStorage.setItem('code_context_token', token);
-    else localStorage.removeItem('code_context_token');
+  if (options.body && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
   }
 
-  async function apiFetch(endpoint, options = {}) {
-    const headers = options.headers || {};
-    const token = getToken();
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    if (options.body && !(options.body instanceof FormData)) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    try {
-      const res = await fetch(endpoint, {
-        ...options,
-        headers,
-      });
-
-      if (res.status === 401) {
-        setToken('');
-        showLoginModal();
-        throw new Error('Unauthorized');
-      }
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(data?.error || `HTTP error ${res.status}`);
-      }
-
-      return data;
-    } catch (err) {
-      if (err.message !== 'Unauthorized') {
-        console.error(`API Error on ${endpoint}:`, err);
-      }
-      throw err;
-    }
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  function formatBytes(bytes) {
-    if (!bytes || isNaN(bytes)) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let idx = 0;
-    let b = Number(bytes);
-    while (b >= 1024 && idx < units.length - 1) {
-      b /= 1024;
-      idx++;
-    }
-    return `${b.toFixed(1)} ${units[idx]}`;
-  }
-
-  function formatDate(d) {
-    if (!d) return 'Never';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return 'Invalid date';
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+  try {
+    const res = await fetch(endpoint, {
+      ...options,
+      headers,
     });
-  }
 
-  function formatDuration(ms) {
-    if (!ms || isNaN(ms)) return '0s';
-    const seconds = Math.floor(ms / 1000);
-    if (seconds < 60) return `${seconds}s`;
-    const mins = Math.floor(seconds / 60);
-    const remSecs = seconds % 60;
-    return `${mins}m ${remSecs}s`;
-  }
-
-  // ==============================================================================
-  // 2. Authentication UI
-  // ==============================================================================
-
-  const loginOverlay = document.getElementById('login-overlay');
-  const loginForm = document.getElementById('login-form');
-  const loginError = document.getElementById('login-error');
-  const appShell = document.getElementById('app-shell');
-  const userDisplayName = document.getElementById('user-display-name');
-  const logoutBtn = document.getElementById('logout-btn');
-
-  function showLoginModal() {
-    loginOverlay.classList.remove('hidden');
-    appShell.classList.add('hidden');
-  }
-
-  function hideLoginModal() {
-    loginOverlay.classList.add('hidden');
-    appShell.classList.remove('hidden');
-  }
-
-  async function checkAuth() {
-    try {
-      const data = await apiFetch('/api/auth/me');
-      state.currentUser = data.user;
-      userDisplayName.textContent = data.user.username;
-      hideLoginModal();
-      handleNavigation();
-    } catch {
+    if (res.status === 401) {
+      setToken('');
       showLoginModal();
+      throw new Error('Unauthorized');
     }
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(data?.error || `HTTP error ${res.status}`);
+    }
+
+    return data;
+  } catch (err) {
+    if (err.message !== 'Unauthorized') {
+      console.error(`API Error on ${endpoint}:`, err);
+    }
+    throw err;
   }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatBytes(bytes) {
+  if (!bytes || isNaN(bytes)) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let idx = 0;
+  let b = Number(bytes);
+  while (b >= 1024 && idx < units.length - 1) {
+    b /= 1024;
+    idx++;
+  }
+  return `${b.toFixed(1)} ${units[idx]}`;
+}
+
+function formatDate(d) {
+  if (!d) return 'Never';
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+function formatDuration(ms) {
+  if (!ms || isNaN(ms)) return '0s';
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const remSecs = seconds % 60;
+  return `${mins}m ${remSecs}s`;
+}
+
+// ==============================================================================
+// 2. Authentication UI
+// ==============================================================================
+
+const loginOverlay = document.getElementById('login-overlay');
+const loginForm = document.getElementById('login-form');
+const loginError = document.getElementById('login-error');
+const appShell = document.getElementById('app-shell');
+const userDisplayName = document.getElementById('user-display-name');
+const logoutBtn = document.getElementById('logout-btn');
+
+function showLoginModal() {
+  loginOverlay.classList.remove('hidden');
+  appShell.classList.add('hidden');
+}
+
+function hideLoginModal() {
+  loginOverlay.classList.add('hidden');
+  appShell.classList.remove('hidden');
+}
+
+async function checkAuth() {
+  try {
+    const data = await apiFetch('/api/auth/me');
+    state.currentUser = data.user;
+    userDisplayName.textContent = data.user.username;
+    hideLoginModal();
+    handleNavigation();
+  } catch {
+    // Local developer convenience: automatic login on localhost so the layout is immediately visible
+    try {
+      const autoRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'admin123' }),
+      });
+      if (autoRes.ok) {
+        const autoData = await autoRes.json();
+        setToken(autoData.token);
+        state.currentUser = autoData.user;
+        userDisplayName.textContent = autoData.user.username;
+        hideLoginModal();
+        handleNavigation();
+        return;
+      }
+    } catch {}
+    showLoginModal();
+  }
+}
 
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -176,6 +243,27 @@
       loginError.classList.remove('hidden');
     }
   });
+
+  const togglePassBtn = document.getElementById('toggle-password-btn');
+  const passInput = document.getElementById('password');
+  if (togglePassBtn && passInput) {
+    togglePassBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      togglePassBtn.textContent = isPass ? 'Hide' : 'Show';
+    });
+  }
+
+  const fillDemoBtn = document.getElementById('fill-demo-btn');
+  if (fillDemoBtn) {
+    fillDemoBtn.addEventListener('click', () => {
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      if (u) u.value = 'admin';
+      if (p) p.value = 'admin123';
+      if (p) p.focus();
+    });
+  }
 
   logoutBtn.addEventListener('click', async () => {
     try {
@@ -550,7 +638,9 @@
 
       select.innerHTML = options;
       if (currentVal) select.value = currentVal;
+      if (select._shadcnSync) select._shadcnSync();
     });
+    enhanceAllSelects();
   }
 
   // Register Project Modal
@@ -1510,6 +1600,8 @@
           `;
         })
         .join('');
+
+      enhanceAllSelects(grid);
     } catch (err) {
       grid.innerHTML = `<p class="text-danger">Failed to load assignments: ${escapeHtml(err.message)}</p>`;
     }
@@ -1544,6 +1636,75 @@
   const provForm = document.getElementById('provider-form');
   const testProvBtn = document.getElementById('test-prov-btn');
   const provTestFeedback = document.getElementById('prov-test-feedback');
+  const provTypeSelect = document.getElementById('prov-type');
+
+  function applyProviderTypeDefaults(type, isNew = false) {
+    const provNameInput = document.getElementById('prov-name');
+    const provUrlInput = document.getElementById('prov-url');
+    const provModelInput = document.getElementById('prov-model');
+
+    if (type === 'gemini') {
+      if (isNew || !provNameInput.value || provNameInput.value === 'OpenAI' || provNameInput.value === 'Local Ollama') {
+        provNameInput.value = 'Google Gemini';
+      }
+      provUrlInput.placeholder = 'Leave blank for official Gemini API';
+      if (isNew || provUrlInput.value.includes(':11434') || provUrlInput.value.includes('openai.com')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'gemini-2.0-flash';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gpt') || provModelInput.value.includes('nomic')) {
+        provModelInput.value = 'gemini-2.0-flash';
+      }
+    } else if (type === 'openai') {
+      if (isNew || !provNameInput.value || provNameInput.value === 'Google Gemini' || provNameInput.value === 'Local Ollama') {
+        provNameInput.value = 'OpenAI';
+      }
+      provUrlInput.placeholder = 'Leave blank for official OpenAI API';
+      if (isNew || provUrlInput.value.includes(':11434')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'gpt-4o-mini';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gemini') || provModelInput.value.includes('nomic')) {
+        provModelInput.value = 'gpt-4o-mini';
+      }
+    } else if (type === 'anthropic') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Anthropic Claude';
+      }
+      provUrlInput.placeholder = 'Leave blank for official Anthropic API';
+      if (isNew || provUrlInput.value.includes(':11434')) {
+        provUrlInput.value = '';
+      }
+      provModelInput.placeholder = 'claude-3-5-sonnet-20241022';
+      if (isNew || !provModelInput.value || provModelInput.value.includes('gemini') || provModelInput.value.includes('gpt')) {
+        provModelInput.value = 'claude-3-5-sonnet-20241022';
+      }
+    } else if (type === 'ollama') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Local Ollama';
+      }
+      provUrlInput.placeholder = 'http://127.0.0.1:11434';
+      if (isNew || !provUrlInput.value) {
+        provUrlInput.value = 'http://127.0.0.1:11434';
+      }
+      provModelInput.placeholder = 'qwen2.5-coder:7b';
+      if (isNew || !provModelInput.value) {
+        provModelInput.value = 'qwen2.5-coder:7b';
+      }
+    } else if (type === 'openai_compatible') {
+      if (isNew || !provNameInput.value) {
+        provNameInput.value = 'Custom LLM Server';
+      }
+      provUrlInput.placeholder = 'https://api.together.xyz/v1 or local URL';
+      provModelInput.placeholder = 'model-name';
+    }
+  }
+
+  if (provTypeSelect) {
+    provTypeSelect.addEventListener('change', () => {
+      applyProviderTypeDefaults(provTypeSelect.value, false);
+    });
+  }
 
   function openProviderModal(existing = null) {
     provTestFeedback.classList.add('hidden');
@@ -1554,16 +1715,18 @@
       document.getElementById('provider-modal-title').textContent = 'Edit AI Provider';
       document.getElementById('prov-id').value = existing.id;
       document.getElementById('prov-name').value = existing.name;
-      document.getElementById('prov-type').value = existing.type;
+      document.getElementById('prov-type').value = existing.type || existing.provider_type;
       document.getElementById('prov-url').value = existing.base_url || '';
       document.getElementById('prov-model').value = existing.default_model || '';
       document.getElementById('prov-enabled').checked = Boolean(existing.is_enabled);
       document.getElementById('prov-key-hint').textContent = 'Leave blank to preserve the existing encrypted API key.';
+      applyProviderTypeDefaults(existing.type || existing.provider_type, false);
     } else {
       state.currentEditingProviderId = null;
       document.getElementById('provider-modal-title').textContent = 'Configure AI Provider';
       document.getElementById('prov-id').value = '';
       document.getElementById('prov-key-hint').textContent = 'Key is encrypted using AES-256-GCM before storage.';
+      applyProviderTypeDefaults(provTypeSelect.value, true);
     }
 
     provModal.classList.remove('hidden');
@@ -1583,9 +1746,13 @@
 
     const providerId = state.currentEditingProviderId;
     const type = document.getElementById('prov-type').value;
-    const apiKey = document.getElementById('prov-key').value;
-    const baseUrl = document.getElementById('prov-url').value;
-    const defaultModel = document.getElementById('prov-model').value;
+    const apiKey = document.getElementById('prov-key').value.trim();
+    let baseUrl = document.getElementById('prov-url').value.trim();
+    if (baseUrl && (type === 'gemini' || type === 'openai' || type === 'anthropic') && baseUrl.includes(':11434')) {
+      baseUrl = '';
+      document.getElementById('prov-url').value = '';
+    }
+    const defaultModel = document.getElementById('prov-model').value.trim();
 
     try {
       const endpoint = providerId ? `/api/ai/providers/${providerId}/test` : '/api/ai/providers/test';
@@ -1597,10 +1764,13 @@
       provTestFeedback.classList.remove('alert-info');
       if (result.ok) {
         provTestFeedback.classList.add('alert-success');
-        provTestFeedback.textContent = `✔ Connected! Latency: ${result.latencyMs}ms. Model: ${result.modelTested}`;
+        const modelsCount = result.modelsFound && result.modelsFound.length
+          ? ` (${result.modelsFound.length} model(s) available: ${result.modelsFound.slice(0, 3).join(', ')})`
+          : '';
+        provTestFeedback.textContent = `✔ Connected! Latency: ${result.latencyMs || 0}ms.${modelsCount}`;
       } else {
         provTestFeedback.classList.add('alert-danger');
-        provTestFeedback.textContent = `✖ Connection failed: ${result.error}`;
+        provTestFeedback.textContent = `✖ Connection failed: ${result.message || result.error || 'Check API key or network'}`;
       }
     } catch (err) {
       provTestFeedback.classList.remove('alert-info');
@@ -1611,11 +1781,14 @@
 
   provForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('prov-id').value || undefined;
+    const id = document.getElementById('prov-id').value.trim() || undefined;
     const name = document.getElementById('prov-name').value.trim();
     const type = document.getElementById('prov-type').value;
-    const apiKey = document.getElementById('prov-key').value || undefined;
-    const baseUrl = document.getElementById('prov-url').value.trim() || undefined;
+    const apiKey = document.getElementById('prov-key').value.trim() || undefined;
+    let baseUrl = document.getElementById('prov-url').value.trim() || undefined;
+    if (baseUrl && (type === 'gemini' || type === 'openai' || type === 'anthropic') && baseUrl.includes(':11434')) {
+      baseUrl = undefined;
+    }
     const defaultModel = document.getElementById('prov-model').value.trim() || undefined;
     const isEnabled = document.getElementById('prov-enabled').checked;
 
@@ -1879,6 +2052,6 @@
   // 17. Application Initialization
   // ==============================================================================
 
+  enhanceAllSelects();
   checkAuth();
-})();
 

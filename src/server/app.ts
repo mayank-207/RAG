@@ -56,7 +56,11 @@ export function createServerApp() {
   if (!fs.existsSync(publicDir)) {
     publicDir = path.resolve(process.cwd(), 'src', 'server', 'public');
   }
-  app.use(express.static(publicDir));
+  app.use(express.static(publicDir, {
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    },
+  }));
 
   // Mount API router
   app.use('/api', apiRouter);

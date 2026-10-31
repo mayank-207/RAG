@@ -137,6 +137,26 @@ describe('Admin Dashboard, Security & AI Provider Integration', () => {
       expect(decrypted).toBe('sk-test-secret-key-1234567890');
     });
 
+    it('creates an AI provider with auto-generated id when id is omitted and sanitizes mistaken Ollama baseUrl for Gemini', async () => {
+      const provider = await aiManager.saveProvider({
+        name: 'Google Gemini Pro',
+        type: 'gemini',
+        apiKey: 'AIzaSyTest1234567890abcdef',
+        baseUrl: 'http://127.0.0.1:11434', // simulated mistaken Ollama URL
+        defaultModel: 'gpt latest', // simulated mismatched model name
+        isEnabled: true,
+      });
+
+      expect(provider.id).toBeDefined();
+      expect(provider.id.length).toBeGreaterThan(0);
+      expect(provider.base_url).toBeNull(); // sanitized
+      expect(provider.default_model).toBe('gemini-2.0-flash'); // corrected
+      expect(provider.masked_api_key).toContain('••••');
+
+      // Clean up
+      await aiManager.deleteProvider(provider.id);
+    });
+
     it('lists providers with masked keys and never exposes plaintext', async () => {
       const providers = await aiManager.listProviders();
       const testProv = providers.find((p) => p.id === 'test-openai-prov');
