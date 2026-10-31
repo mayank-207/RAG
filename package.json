@@ -22,6 +22,7 @@
     "status": "tsx src/cli/index.ts status",
     "health": "tsx src/cli/index.ts health",
     "dashboard": "tsx src/cli/index.ts dashboard",
+    "dev": "tsx src/cli/index.ts dashboard",
     "mcp": "tsx src/cli/index.ts mcp",
     "test": "vitest run",
     "test:watch": "vitest"
