@@ -177,6 +177,27 @@
     }
   });
 
+  const togglePassBtn = document.getElementById('toggle-password-btn');
+  const passInput = document.getElementById('password');
+  if (togglePassBtn && passInput) {
+    togglePassBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      togglePassBtn.textContent = isPass ? 'Hide' : 'Show';
+    });
+  }
+
+  const fillDemoBtn = document.getElementById('fill-demo-btn');
+  if (fillDemoBtn) {
+    fillDemoBtn.addEventListener('click', () => {
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      if (u) u.value = 'admin';
+      if (p) p.value = 'admin123';
+      if (p) p.focus();
+    });
+  }
+
   logoutBtn.addEventListener('click', async () => {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
