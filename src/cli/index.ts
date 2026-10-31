@@ -432,5 +432,29 @@ program
     await server.start();
   });
 
+// Local Admin Dashboard Command
+program
+  .command('dashboard')
+  .description('Start the Local Admin Dashboard web server')
+  .option('-p, --port <port>', 'Port to listen on', '3000')
+  .option('-h, --host <host>', 'Host address to bind to', '127.0.0.1')
+  .action(async (opts) => {
+    try {
+      const { startDashboardServer } = await import('../server/app.js');
+      const port = Number(opts.port) || 3000;
+      const host = opts.host || '127.0.0.1';
+      const { url } = await startDashboardServer(port, host);
+      console.log('\n======================================================');
+      console.log('       code-context-mcp Local Admin Dashboard          ');
+      console.log('======================================================');
+      console.log(` ✔ Dashboard running at: ${url}`);
+      console.log(` ✔ Initial credentials:  admin / admin123`);
+      console.log(' Press Ctrl+C to stop the dashboard server.\n');
+    } catch (err: any) {
+      console.error('Failed to start dashboard server:', err?.message || err);
+      process.exit(1);
+    }
+  });
+
 program.parse(process.argv);
 

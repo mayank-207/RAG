@@ -136,7 +136,41 @@ npm run health
 
 ---
 
-## 5. Registering and Indexing Projects
+## 5. Local Admin Dashboard
+
+`code-context-mcp` includes a built-in, responsive web management interface.
+
+### Launching the Dashboard
+
+```bash
+npm run dashboard
+```
+
+Or specify custom port and host:
+
+```bash
+npm run dashboard -- --port 3000 --host 127.0.0.1
+```
+
+Open your browser at: **[http://127.0.0.1:3000](http://127.0.0.1:3000)**
+
+- **Default Username:** `admin`
+- **Default Password:** `admin123`
+
+### Dashboard Capabilities:
+- **Project Management**: Register local codebases, inspect Git status (branch, commit hash, uncommitted files), trigger incremental/full indexing, and purge index data without modifying source files.
+- **Code Explorer**: Search indexed files, view segmented code chunks with line ranges, inspect full code snippets, and search AST-extracted symbols (classes, methods, hooks, routes).
+- **Dependency Graph**: Visualize linkages between routes and controllers, controllers and models, components and imports.
+- **AI Provider Configuration**: Configure OpenAI, Google Gemini, Anthropic Claude, and local Ollama. API keys are encrypted at rest with **AES-256-GCM** and displayed securely masked (`sk-••••1234`).
+- **Task-Specific Model Assignments**: Assign different AI models to specialized assistant tasks (code analysis, context ranking, query expansion, architectural impact).
+- **Embedding Isolation**: Manage vector embeddings independently from generative models to avoid collection corruption.
+- **Live Diagnostics**: Real-time health monitoring for MySQL 8.4, Qdrant, Ollama, and MCP stdio transport, plus error logs and retrieval query audit.
+
+For comprehensive documentation, see [docs/admin-dashboard.md](docs/admin-dashboard.md).
+
+---
+
+## 6. Registering and Indexing Projects (CLI)
 
 ### Register a Project
 
@@ -241,7 +275,7 @@ Run the automated test suite:
 npm test
 ```
 
-The test suite includes 23 unit and integration tests verifying:
+The test suite includes 38 unit and integration tests verifying:
 
 - PHP / Laravel AST parsing (classes, methods, relationships, routes, migrations)
 - React / TypeScript AST parsing (components, hooks, imports, JSX elements)
@@ -253,6 +287,8 @@ The test suite includes 23 unit and integration tests verifying:
 - FULLTEXT and hybrid search
 - Dependency graph impact analysis
 - MCP tool JSON-RPC contracts
+- Local Admin Dashboard REST endpoints, PBKDF2 authentication, and session tokens
+- AES-256-GCM API key encryption, masking, and AI provider testing
 
 ---
 
@@ -260,7 +296,14 @@ The test suite includes 23 unit and integration tests verifying:
 
 - [docs/requirements.md](docs/requirements.md): Complete requirements and architectural decisions.
 - [docs/architecture.md](docs/architecture.md): Complete system architecture and component designs.
+- [docs/admin-dashboard.md](docs/admin-dashboard.md): Local Admin Dashboard user guide and REST API reference.
+- [docs/ai-model-configuration.md](docs/ai-model-configuration.md): AI provider setup, model assignments, and embedding isolation.
+- [docs/security.md](docs/security.md): Cryptography, AES-256-GCM encryption, and local-first security.
 - [docs/database-schema.md](docs/database-schema.md): MySQL 8.4 schema documentation and ER diagram.
+- [docs/setup-guide.md](docs/setup-guide.md): Step-by-step local workstation setup guide.
+- [docs/rag-flow.md](docs/rag-flow.md): Indexing, parsing, chunking, and search pipeline.
+- [docs/mcp-setup.md](docs/mcp-setup.md): Google Antigravity MCP integration instructions.
+- [docs/development-guide.md](docs/development-guide.md): Developer guide for extending code-context-mcp.
 - [docs/setup-guide.md](docs/setup-guide.md): Step-by-step setup on Windows and Linux.
 - [docs/development-guide.md](docs/development-guide.md): Directory structure, coding conventions, and developer workflows.
 - [docs/mcp-setup.md](docs/mcp-setup.md): Guide for connecting to Google Antigravity.

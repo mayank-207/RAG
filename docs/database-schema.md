@@ -237,3 +237,60 @@ Tracks indexing lifecycle, diagnostics, and failure recovery.
   - `stack_trace` TEXT NULL
   - `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 
+### 12. `admin_users` & `admin_sessions` (Migration 002)
+Secures the Local Admin Dashboard with PBKDF2 authentication and cryptographic sessions.
+- **`admin_users`**:
+  - `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+  - `username` VARCHAR(64) NOT NULL UNIQUE
+  - `password_hash` VARCHAR(255) NOT NULL (PBKDF2 with HMAC-SHA-512)
+  - `password_salt` VARCHAR(64) NOT NULL (16-byte random salt)
+  - `display_name` VARCHAR(128) NULL
+  - `is_active` TINYINT(1) NOT NULL DEFAULT 1
+  - `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  - `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+- **`admin_sessions`**:
+  - `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+  - `user_id` BIGINT UNSIGNED NOT NULL
+  - `token` VARCHAR(64) NOT NULL UNIQUE (32-byte cryptographic random hex)
+  - `ip_address` VARCHAR(45) NULL
+  - `user_agent` VARCHAR(255) NULL
+  - `expires_at` DATETIME NOT NULL
+  - `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  - **Foreign Key**: `CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE`
+
+### 13. `ai_providers` (Migration 002)
+Stores configuration for LLM providers with AES-256-GCM encrypted API keys.
+- `id` VARCHAR(64) PRIMARY KEY (e.g. 'openai', 'gemini', 'anthropic', 'ollama')
+- `name` VARCHAR(128) NOT NULL
+- `provider_type` VARCHAR(64) NOT NULL ('openai', 'gemini', 'anthropic', 'ollama', 'openai_compatible')
+- `api_key_encrypted` TEXT NULL (AES-256-GCM encrypted payload `iv:authTag:ciphertext`)
+- `api_key_masked` VARCHAR(255) NULL (Safe preview, e.g. `sk-••••1234`)
+- `base_url` VARCHAR(512) NULL
+- `api_version` VARCHAR(64) NULL
+- `is_enabled` TINYINT(1) NOT NULL DEFAULT 1
+- `default_model` VARCHAR(128) NULL
+- `config` JSON NULL
+- `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+- `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+### 14. `ai_model_assignments` (Migration 002)
+Maps specific software engineering tasks to designated AI models.
+- `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `task_type` VARCHAR(64) NOT NULL UNIQUE ('code_analysis', 'context_ranking', 'query_reformulation', 'architectural_reasoning')
+- `provider_id` VARCHAR(64) NOT NULL
+- `model_name` VARCHAR(128) NOT NULL
+- `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+- `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+- **Foreign Key**: `CONSTRAINT fk_assign_provider FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE`
+
+### 15. `embedding_settings` (Migration 002)
+Isolates dense vector embedding configuration from generative chat models.
+- `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `provider` VARCHAR(64) NOT NULL DEFAULT 'ollama'
+- `model_name` VARCHAR(128) NOT NULL DEFAULT 'nomic-embed-text'
+- `dimensions` INT UNSIGNED NOT NULL DEFAULT 768
+- `batch_size` INT UNSIGNED NOT NULL DEFAULT 32
+- `is_synced` TINYINT(1) NOT NULL DEFAULT 1
+- `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+

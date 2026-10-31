@@ -134,23 +134,36 @@ Ollama provides local vector embeddings without requiring paid cloud APIs.
    npm run health
    ```
 
+7. Start the Local Admin Dashboard:
+   ```bash
+   npm run dashboard
+   ```
+   Open **http://127.0.0.1:3000** in your browser.
+   Sign in with `admin` / `admin123`.
+
 ---
 
 ## 5. Quick Start Example
 
-1. Register a project:
+1. Start the Admin Dashboard:
+   ```bash
+   npm run dashboard
+   ```
+   Or manage via CLI:
+
+2. Register a project:
    ```bash
    npm run project:add -- --id my-app --name "My Laravel App" --path "C:/path/to/my-app" --framework laravel
    ```
-2. Run full index:
+3. Run full index:
    ```bash
    npm run index:full -- --project my-app
    ```
-3. Test search:
+4. Test search:
    ```bash
    npm run search -- --project my-app --query "User authentication controller"
    ```
-4. Start MCP server:
+5. Start MCP server:
    ```bash
    npm run mcp
    ```
