@@ -28,6 +28,12 @@ local-data/indexing/
 *.sql
 *.dump
 *.tar.gz
+*.zip
+*.exe
+qdrant.exe
+storage/
+.qdrant-initialized
+snapshots/
 qdrant_storage/
 qdrant_data/
 vectors/
