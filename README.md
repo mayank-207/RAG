@@ -143,6 +143,8 @@ npm run health
 ### Launching the Dashboard
 
 ```bash
+npm run dev
+# or
 npm run dashboard
 ```
 
