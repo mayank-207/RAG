@@ -28,10 +28,14 @@ local-data/indexing/
 *.sql
 *.dump
 *.tar.gz
-qdrant_storage/
-qdrant_data/
-vectors/
-embeddings/
+*.zip
+*.exe
+qdrant.exe
+/storage/
+.qdrant-initialized
+/snapshots/
+/qdrant_storage/
+/qdrant_data/
 
 # IDE and OS
 .vscode/
