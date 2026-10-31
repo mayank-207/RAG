@@ -30,6 +30,13 @@
   padding: 0;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-dark);
@@ -46,17 +53,26 @@ code, pre, .mono {
 /* Layout */
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-/* Sidebar */
+/* Sidebar - Sticky and Fixed */
 .sidebar {
   width: 260px;
+  min-width: 260px;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -65,6 +81,7 @@ code, pre, .mono {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -88,6 +105,18 @@ code, pre, .mono {
   padding: 16px 12px;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
 .nav-section-label {
@@ -128,6 +157,8 @@ code, pre, .mono {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
+  background-color: var(--bg-sidebar);
 }
 
 .user-info {
@@ -164,21 +195,45 @@ code, pre, .mono {
   color: var(--text-dim);
 }
 
-/* Main Content */
+/* Main Content Area */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--bg-dark);
 }
 
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+.main-content::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+.main-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* Sticky Topbar */
 .topbar {
   height: 64px;
+  min-height: 64px;
   border-bottom: 1px solid var(--border-color);
   padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
   background-color: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(12px);
   position: sticky;
@@ -346,6 +401,7 @@ code, pre, .mono {
 
 .card-body.p-0 {
   padding: 0;
+  overflow-x: auto;
 }
 
 /* Tables */
@@ -356,13 +412,16 @@ code, pre, .mono {
 }
 
 .table th {
-  background-color: rgba(15, 23, 42, 0.5);
+  background-color: #1a2438;
   padding: 12px 18px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 64px;
+  z-index: 5;
 }
 
 .table td {
