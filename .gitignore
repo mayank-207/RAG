@@ -31,13 +31,11 @@ local-data/indexing/
 *.zip
 *.exe
 qdrant.exe
-storage/
+/storage/
 .qdrant-initialized
-snapshots/
-qdrant_storage/
-qdrant_data/
-vectors/
-embeddings/
+/snapshots/
+/qdrant_storage/
+/qdrant_data/
 
 # IDE and OS
 .vscode/
